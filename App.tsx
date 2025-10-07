@@ -1,165 +1,248 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// App.tsx
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from "react-native";
 
-const Stack = createNativeStackNavigator();
+export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<"home" | "addRemove">(
+    "home"
+  );
 
-const initialDishes = [
-  { id: '1', name: 'Grilled Salmon', category: 'Seafood', price: 'R150' },
-  { id: '2', name: 'Chicken Burger', category: 'Fast Food', price: 'R120' },
-  { id: '3', name: 'Caesar Salad', category: 'Salad', price: 'R90' },
-];
+  // State for adding/removing dishes
+  const [dishName, setDishName] = useState("");
+  const [description, setDescription] = useState("");
+  const [course, setCourse] = useState("");
+  const [price, setPrice] = useState("");
+  const [menu, setMenu] = useState([
+    {
+      course: "Entrées (Starters)",
+      dishes: [
+        "Seared Scallops – R185",
+        "Beef Carpaccio – R165",
+        "Lobster Bisque – R175",
+      ],
+    },
+    {
+      course: "Plats Principaux (Mains)",
+      dishes: [
+        "Filet Mignon – R350",
+        "Pan-Seared Duck Breast – R325",
+        "Grilled Chilean Sea Bass – R345",
+      ],
+    },
+    {
+      course: "Desserts",
+      dishes: [
+        "Dark Chocolate Fondant – R145",
+        "Crème Brûlée – R135",
+        "Tarte Tatin – R140",
+      ],
+    },
+    {
+      course: "Digestifs & Beverages",
+      dishes: [
+        "Espresso, Cappuccino, Specialty Teas – R45 – R65",
+        "Sommelier’s Wine Pairings – R120 per glass / R450 per bottle",
+        "Fine Cognac & Aged Whiskey Selection – From R180",
+      ],
+    },
+  ]);
 
-// 🏠 Home Screen
-function HomeScreen({ navigation }) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🍽️ FreshBite Restaurant</Text>
+  // Add dish
+  const handleAddDish = () => {
+    if (!dishName || !course || !price) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddRemove')}>
+    const updatedMenu = menu.map((section) => {
+      if (section.course === course) {
+        return {
+          ...section,
+          dishes: [
+            ...section.dishes,
+            `${dishName} – R${price}${description ? ` (${description})` : ""}`,
+          ],
+        };
+      }
+      return section;
+    });
+
+    setMenu(updatedMenu);
+    setDishName("");
+    setDescription("");
+    setCourse("");
+    setPrice("");
+    Alert.alert("Success", "Dish added to the menu!");
+  };
+
+  // Remove dish
+  const handleRemoveDish = () => {
+    if (!dishName) {
+      Alert.alert("Error", "Please enter a dish name to remove");
+      return;
+    }
+
+    const updatedMenu = menu.map((section) => ({
+      ...section,
+      dishes: section.dishes.filter(
+        (dish) => !dish.toLowerCase().includes(dishName.toLowerCase())
+      ),
+    }));
+
+    setMenu(updatedMenu);
+    setDishName("");
+    Alert.alert("Removed", "Dish has been removed from the menu.");
+  };
+
+  // Render Home Screen
+  const HomeScreen = () => (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Christoffel’s</Text>
+      <Text style={styles.subtitle}>Tonight’s Menu</Text>
+
+      {menu.map((section, index) => (
+        <View key={index} style={styles.section}>
+          <Text style={styles.sectionTitle}>{section.course}</Text>
+          {section.dishes.map((dish, i) => (
+            <Text key={i} style={styles.dishText}>
+              {dish}
+            </Text>
+          ))}
+        </View>
+      ))}
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setCurrentScreen("addRemove")}
+      >
         <Text style={styles.buttonText}>Add / Remove Dishes</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ViewDishes')}>
-        <Text style={styles.buttonText}>View Dishes</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
-}
 
-// ➕ Add / Remove Dishes Screen
-function AddRemoveScreen() {
-  const [dish, setDish] = useState('');
-  const [menu, setMenu] = useState(initialDishes);
-
-  const addDish = () => {
-    if (dish.trim() === '') return Alert.alert('Error', 'Please enter a dish name');
-    const newDish = { id: Date.now().toString(), name: dish, category: 'Custom', price: 'R100' };
-    setMenu([...menu, newDish]);
-    Alert.alert('Success', `${dish} added to menu!`);
-    setDish('');
-  };
-
-  const removeDish = (id) => {
-    const updatedMenu = menu.filter((item) => item.id !== id);
-    setMenu(updatedMenu);
-    Alert.alert('Removed', 'Dish has been removed.');
-  };
-
-  return (
-    <View style={styles.container}>
+  // Render Add/Remove Dishes Screen
+  const AddRemoveScreen = () => (
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Add / Remove Dishes</Text>
 
       <TextInput
+        placeholder="Dish Name"
+        value={dishName}
+        onChangeText={setDishName}
         style={styles.input}
-        placeholder="Enter new dish name"
-        value={dish}
-        onChangeText={setDish}
+      />
+      <TextInput
+        placeholder="Description"
+        value={description}
+        onChangeText={setDescription}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Course (e.g. Entrées (Starters))"
+        value={course}
+        onChangeText={setCourse}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Price (e.g. 185)"
+        value={price}
+        onChangeText={setPrice}
+        keyboardType="numeric"
+        style={styles.input}
       />
 
-      <TouchableOpacity style={styles.button} onPress={addDish}>
+      <TouchableOpacity style={styles.button} onPress={handleAddDish}>
         <Text style={styles.buttonText}>Add Dish</Text>
       </TouchableOpacity>
 
-      <FlatList
-        data={menu}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.menuItem}>
-            <Text style={styles.dish}>{item.name}</Text>
-            <TouchableOpacity onPress={() => removeDish(item.id)}>
-              <Text style={styles.remove}>Remove</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-    </View>
+      <TouchableOpacity style={styles.removeButton} onPress={handleRemoveDish}>
+        <Text style={styles.buttonText}>Remove Dish</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.homeButton}
+        onPress={() => setCurrentScreen("home")}
+      >
+        <Text style={styles.buttonText}>Back to Home</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
+
+  return currentScreen === "home" ? <HomeScreen /> : <AddRemoveScreen />;
 }
 
-// 🍴 View Dishes Screen (no filter)
-function ViewDishesScreen() {
-  const [menu] = useState(initialDishes);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>View Dishes</Text>
-      <FlatList
-        data={menu}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.menuItem}>
-            <Text style={styles.dish}>{item.name}</Text>
-            <Text style={styles.price}>{item.price}</Text>
-          </View>
-        )}
-      />
-    </View>
-  );
-}
-
-// 🧭 App Navigation
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AddRemove" component={AddRemoveScreen} />
-        <Stack.Screen name="ViewDishes" component={ViewDishesScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fffaf0",
     padding: 20,
-    alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginVertical: 20,
-  },
-  button: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 10,
+    fontSize: 32,
+    fontWeight: "bold",
+    textAlign: "center",
     marginVertical: 10,
-    width: 220,
+    color: "#3e2723",
   },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
+  subtitle: {
+    fontSize: 22,
+    textAlign: "center",
+    color: "#5d4037",
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    paddingBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#4e342e",
+    marginBottom: 5,
+  },
+  dishText: {
+    fontSize: 16,
+    color: "#3e2723",
+    marginVertical: 2,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#999',
-    padding: 10,
+    borderColor: "#ccc",
     borderRadius: 8,
-    width: '90%',
-    marginBottom: 10,
+    padding: 10,
+    marginVertical: 8,
   },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 250,
-    paddingVertical: 8,
+  button: {
+    backgroundColor: "#795548",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
   },
-  dish: {
+  removeButton: {
+    backgroundColor: "#d32f2f",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  homeButton: {
+    backgroundColor: "#388e3c",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: "white",
     fontSize: 16,
-  },
-  price: {
-    fontWeight: 'bold',
-  },
-  remove: {
-    color: 'red',
-    fontWeight: '600',
+    textAlign: "center",
   },
 });
