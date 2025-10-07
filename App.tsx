@@ -9,6 +9,12 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
+
+interface MenuSection {
+  course: string;
+  dishes: string[];
+}
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<"home" | "addRemove">(
@@ -19,7 +25,7 @@ export default function App() {
   const [description, setDescription] = useState("");
   const [course, setCourse] = useState("");
   const [price, setPrice] = useState("");
-  const [menu, setMenu] = useState([
+  const [menu, setMenu] = useState<MenuSection[]>([
     {
       course: "Entrées (Starters)",
       dishes: [
@@ -53,6 +59,13 @@ export default function App() {
       ],
     },
   ]);
+
+  const courses = [
+    { label: "Entrées (Starters)", value: "Entrées (Starters)" },
+    { label: "Plats Principaux (Mains)", value: "Plats Principaux (Mains)" },
+    { label: "Desserts", value: "Desserts" },
+    { label: "Digestifs & Beverages", value: "Digestifs & Beverages" },
+  ];
 
   // Add dish
   const handleAddDish = () => {
@@ -138,18 +151,24 @@ export default function App() {
         onChangeText={setDishName}
         style={styles.input}
       />
+
       <TextInput
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
         style={styles.input}
       />
-      <TextInput
-        placeholder="Course (e.g. Entrées (Starters))"
+
+      <Dropdown
+        style={styles.dropdown}
+        data={courses}
+        labelField="label"
+        valueField="value"
+        placeholder="Select Course"
         value={course}
-        onChangeText={setCourse}
-        style={styles.input}
+        onChange={(item) => setCourse(item.value)}
       />
+
       <TextInput
         placeholder="Price (e.g. 185)"
         value={price}
@@ -185,7 +204,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    fontSize: 40,
+    fontSize: 42,
     fontFamily: "serif",
     fontStyle: "italic",
     fontWeight: "300",
@@ -221,6 +240,14 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
+    marginVertical: 8,
+    backgroundColor: "#fff",
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 12,
     marginVertical: 8,
     backgroundColor: "#fff",
   },
