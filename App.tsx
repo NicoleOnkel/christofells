@@ -15,7 +15,6 @@ export default function App() {
     "home"
   );
 
-  // State for adding/removing dishes
   const [dishName, setDishName] = useState("");
   const [description, setDescription] = useState("");
   const [course, setCourse] = useState("");
@@ -102,10 +101,10 @@ export default function App() {
     Alert.alert("Removed", "Dish has been removed from the menu.");
   };
 
-  // Render Home Screen
+  // Home Screen
   const HomeScreen = () => (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Christoffel’s</Text>
+      <Text style={styles.logo}>Christoffel’s</Text>
       <Text style={styles.subtitle}>Tonight’s Menu</Text>
 
       {menu.map((section, index) => (
@@ -120,7 +119,7 @@ export default function App() {
       ))}
 
       <TouchableOpacity
-        style={styles.button}
+        style={styles.goldButton}
         onPress={() => setCurrentScreen("addRemove")}
       >
         <Text style={styles.buttonText}>Add / Remove Dishes</Text>
@@ -128,7 +127,7 @@ export default function App() {
     </ScrollView>
   );
 
-  // Render Add/Remove Dishes Screen
+  // Add / Remove Screen
   const AddRemoveScreen = () => (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Add / Remove Dishes</Text>
@@ -159,7 +158,7 @@ export default function App() {
         style={styles.input}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleAddDish}>
+      <TouchableOpacity style={styles.goldButton} onPress={handleAddDish}>
         <Text style={styles.buttonText}>Add Dish</Text>
       </TouchableOpacity>
 
@@ -185,12 +184,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fffaf0",
     padding: 20,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
+  logo: {
+    fontSize: 40,
+    fontFamily: "serif",
+    fontStyle: "italic",
+    fontWeight: "300",
     textAlign: "center",
-    marginVertical: 10,
-    color: "#3e2723",
+    marginTop: 20,
+    color: "#6b4f1d",
   },
   subtitle: {
     fontSize: 22,
@@ -221,28 +222,42 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginVertical: 8,
+    backgroundColor: "#fff",
   },
-  button: {
-    backgroundColor: "#795548",
+  goldButton: {
+    backgroundColor: "#C9A43C",
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
   },
   removeButton: {
-    backgroundColor: "#d32f2f",
+    backgroundColor: "#b22222",
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
   },
   homeButton: {
-    backgroundColor: "#388e3c",
+    backgroundColor: "#C9A43C",
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
   },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#4e342e",
+    marginBottom: 20,
+  },
   buttonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
     textAlign: "center",
+    fontWeight: "500",
   },
 });
