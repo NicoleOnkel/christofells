@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  SafeAreaView,
+  Platform,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
@@ -18,6 +20,7 @@ type Dish = {
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<"home" | "addRemove" | "filter">("home");
+
   const [menu, setMenu] = useState<Dish[]>([
     { name: "Seared Scallops", description: "", course: "Starters", price: "R185" },
     { name: "Beef Carpaccio", description: "", course: "Starters", price: "R165" },
@@ -28,6 +31,9 @@ export default function App() {
     { name: "Dark Chocolate Fondant", description: "", course: "Desserts", price: "R145" },
     { name: "Crème Brûlée", description: "", course: "Desserts", price: "R135" },
     { name: "Tarte Tatin", description: "", course: "Desserts", price: "R140" },
+    { name: "Espresso, Cappuccino, Specialty Teas", description: "", course: "Digestifs & Beverages", price: "R45 – R65" },
+    { name: "Sommelier’s Wine Pairings", description: "", course: "Digestifs & Beverages", price: "R120 per glass / R450 per bottle" },
+    { name: "Fine Cognac & Aged Whiskey Selection", description: "", course: "Digestifs & Beverages", price: "From R180" },
   ]);
 
   const [newDish, setNewDish] = useState<Dish>({
@@ -40,7 +46,7 @@ export default function App() {
 
   const handleAddDish = () => {
     if (!newDish.name || !newDish.course || !newDish.price) {
-      Alert.alert("Please fill in all fields.");
+      Alert.alert("Please fill in all required fields.");
       return;
     }
     setMenu([...menu, newDish]);
@@ -61,140 +67,144 @@ export default function App() {
 
   // Home Screen
   const HomeScreen = () => (
-    <KeyboardAwareScrollView style={styles.container}>
-      <Text style={styles.restaurantName}>Christoffel’s</Text>
-      <Text style={styles.subtitle}>Tonight’s Menu</Text>
-
-      {["Starters", "Mains", "Desserts", "Digestifs & Beverages"].map((section) => (
-        <View key={section} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section}</Text>
-          {menu
-            .filter((dish) => dish.course === section)
-            .map((dish, index) => (
-              <Text key={index} style={styles.dishText}>
-                {dish.name} – {dish.price}
-              </Text>
-            ))}
-        </View>
-      ))}
-
-      <TouchableOpacity
-        style={styles.goldButton}
-        onPress={() => setCurrentScreen("addRemove")}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff8e1" }}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        extraScrollHeight={100}
+        enableOnAndroid={true}
       >
-        <Text style={styles.buttonText}>Add / Remove Dishes</Text>
-      </TouchableOpacity>
+        <Text style={styles.restaurantName}>Christoffel’s</Text>
+        <Text style={styles.subtitle}>Tonight’s Menu</Text>
 
-      <TouchableOpacity
-        style={styles.goldButton}
-        onPress={() => setCurrentScreen("filter")}
-      >
-        <Text style={styles.buttonText}>Select Dishes by Course</Text>
-      </TouchableOpacity>
-    </KeyboardAwareScrollView>
+        {["Starters", "Mains", "Desserts", "Digestifs & Beverages"].map((section) => (
+          <View key={section} style={styles.section}>
+            <Text style={styles.sectionTitle}>{section}</Text>
+            {menu
+              .filter((dish) => dish.course === section)
+              .map((dish, index) => (
+                <Text key={index} style={styles.dishText}>
+                  {dish.name} – {dish.price}
+                </Text>
+              ))}
+          </View>
+        ))}
+
+        <TouchableOpacity
+          style={styles.goldButton}
+          onPress={() => setCurrentScreen("addRemove")}
+        >
+          <Text style={styles.buttonText}>Add / Remove Dishes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.goldButton}
+          onPress={() => setCurrentScreen("filter")}
+        >
+          <Text style={styles.buttonText}>Select Dishes by Course</Text>
+        </TouchableOpacity>
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 
-  // Add/Remove Screen
+  // Add / Remove Screen
   const AddRemoveScreen = () => (
-    <KeyboardAwareScrollView style={styles.container}>
-      <Text style={styles.title}>Manage Menu</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff8e1" }}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        extraScrollHeight={100}
+        enableOnAndroid={true}
+      >
+        <Text style={styles.title}>Manage Menu</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Dish Name"
-        value={newDish.name}
-        onChangeText={(text) => setNewDish({ ...newDish, name: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={newDish.description}
-        onChangeText={(text) => setNewDish({ ...newDish, description: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Course (e.g., Starters, Mains, Desserts)"
-        value={newDish.course}
-        onChangeText={(text) => setNewDish({ ...newDish, course: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Price (e.g., R150)"
-        keyboardType="default"
-        value={newDish.price}
-        onChangeText={(text) => setNewDish({ ...newDish, price: text })}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Dish Name"
+          value={newDish.name}
+          onChangeText={(text) => setNewDish({ ...newDish, name: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={newDish.description}
+          onChangeText={(text) => setNewDish({ ...newDish, description: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Course (e.g., Starters, Mains, Desserts, Digestifs & Beverages)"
+          value={newDish.course}
+          onChangeText={(text) => setNewDish({ ...newDish, course: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Price (e.g., R150)"
+          value={newDish.price}
+          onChangeText={(text) => setNewDish({ ...newDish, price: text })}
+        />
 
-      <TouchableOpacity style={styles.goldButton} onPress={handleAddDish}>
-        <Text style={styles.buttonText}>Add to Menu</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.goldButton} onPress={handleAddDish}>
+          <Text style={styles.buttonText}>Add to Menu</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.removeButton} onPress={handleRemoveDish}>
-        <Text style={styles.buttonText}>Remove Dish</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.homeButton} onPress={() => setCurrentScreen("home")}>
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </TouchableOpacity>
-    </KeyboardAwareScrollView>
-  );
-
-  // Filter Courses Screen
-  const FilterCoursesScreen = () => {
-    const filteredDishes = menu.filter((dish) => dish.course === filter);
-
-    return (
-      <KeyboardAwareScrollView style={styles.container}>
-        <Text style={styles.title}>Filter Courses</Text>
-
-        {["Starters", "Mains", "Desserts"].map((course) => (
-          <TouchableOpacity
-            key={course}
-            style={styles.goldButton}
-            onPress={() => setFilter(course)}
-          >
-            <Text style={styles.buttonText}>{course}</Text>
-          </TouchableOpacity>
-        ))}
-
-        <Text style={styles.subtitle}>Showing: {filter}</Text>
-        {filteredDishes.map((dish, index) => (
-          <Text key={index} style={styles.dishText}>
-            {dish.name} – {dish.price}
-          </Text>
-        ))}
+        <TouchableOpacity style={styles.removeButton} onPress={handleRemoveDish}>
+          <Text style={styles.buttonText}>Remove Dish</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.homeButton} onPress={() => setCurrentScreen("home")}>
           <Text style={styles.buttonText}>Back to Home</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
+    </SafeAreaView>
+  );
+
+  // Filter Screen
+  const FilterCoursesScreen = () => {
+    const filteredDishes = menu.filter((dish) => dish.course === filter);
+
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff8e1" }}>
+        <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <Text style={styles.title}>Filter Courses</Text>
+
+          {["Starters", "Mains", "Desserts", "Digestifs & Beverages"].map((course) => (
+            <TouchableOpacity
+              key={course}
+              style={styles.goldButton}
+              onPress={() => setFilter(course)}
+            >
+              <Text style={styles.buttonText}>{course}</Text>
+            </TouchableOpacity>
+          ))}
+
+          <Text style={styles.subtitle}>Showing: {filter}</Text>
+          {filteredDishes.map((dish, index) => (
+            <Text key={index} style={styles.dishText}>
+              {dish.name} – {dish.price}
+            </Text>
+          ))}
+
+          <TouchableOpacity style={styles.homeButton} onPress={() => setCurrentScreen("home")}>
+            <Text style={styles.buttonText}>Back to Home</Text>
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
     );
   };
 
-  return (
-    <>
-      {currentScreen === "home" ? (
-        <HomeScreen />
-      ) : currentScreen === "filter" ? (
-        <FilterCoursesScreen />
-      ) : (
-        <AddRemoveScreen />
-      )}
-    </>
+  return currentScreen === "home" ? (
+    <HomeScreen />
+  ) : currentScreen === "filter" ? (
+    <FilterCoursesScreen />
+  ) : (
+    <AddRemoveScreen />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff8e1",
-    padding: 20,
-  },
   restaurantName: {
     fontSize: 40,
     textAlign: "center",
     color: "#6b4f1d",
-    fontFamily: "cursive",
+    fontFamily: Platform.OS === "ios" ? "Snell Roundhand" : "cursive",
     marginVertical: 10,
   },
   subtitle: {
