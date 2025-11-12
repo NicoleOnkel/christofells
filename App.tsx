@@ -25,6 +25,7 @@ export default function App() {
   const [description, setDescription] = useState("");
   const [course, setCourse] = useState("");
   const [price, setPrice] = useState("");
+  const [addedDishes, setAddedDishes] = useState<string[]>([]); // Array to store added dishes
   const [menu, setMenu] = useState<MenuSection[]>([
     {
       course: "Entrées (Starters)",
@@ -67,13 +68,14 @@ export default function App() {
     { label: "Digestifs & Beverages", value: "Digestifs & Beverages" },
   ];
 
-  // Add dish
+  // Add dish to the menu and to the addedDishes array
   const handleAddDish = () => {
     if (!dishName || !course || !price) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
+    // Add the new dish to the menu
     const updatedMenu = menu.map((section) => {
       if (section.course === course) {
         return {
@@ -88,6 +90,14 @@ export default function App() {
     });
 
     setMenu(updatedMenu);
+
+    // Add the new dish to the addedDishes array
+    setAddedDishes((prevDishes) => [
+      ...prevDishes,
+      `${dishName} – R${price}${description ? ` (${description})` : ""}`,
+    ]);
+
+    // Clear form fields
     setDishName("");
     setDescription("");
     setCourse("");
@@ -95,7 +105,7 @@ export default function App() {
     Alert.alert("Success", "Dish added to the menu!");
   };
 
-  // Remove dish
+  // Remove dish from the menu
   const handleRemoveDish = () => {
     if (!dishName) {
       Alert.alert("Error", "Please enter a dish name to remove");
@@ -130,6 +140,17 @@ export default function App() {
           ))}
         </View>
       ))}
+
+      <Text style={styles.subtitle}>Recently Added Dishes</Text>
+      {addedDishes.length > 0 ? (
+        addedDishes.map((dish, i) => (
+          <Text key={i} style={styles.dishText}>
+            {dish}
+          </Text>
+        ))
+      ) : (
+        <Text style={styles.dishText}>No dishes added yet</Text>
+      )}
 
       <TouchableOpacity
         style={styles.goldButton}
