@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -6,151 +5,78 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   Alert,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-interface MenuSection {
+type Dish = {
+  name: string;
+  description: string;
   course: string;
-  dishes: string[];
-}
+  price: string;
+};
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<"home" | "addRemove">(
-    "home"
-  );
-
-  const [dishName, setDishName] = useState("");
-  const [description, setDescription] = useState("");
-  const [course, setCourse] = useState("");
-  const [price, setPrice] = useState("");
-  const [addedDishes, setAddedDishes] = useState<string[]>([]); // Array to store added dishes
-  const [menu, setMenu] = useState<MenuSection[]>([
-    {
-      course: "Entrées (Starters)",
-      dishes: [
-        "Seared Scallops – R185",
-        "Beef Carpaccio – R165",
-        "Lobster Bisque – R175",
-      ],
-    },
-    {
-      course: "Plats Principaux (Mains)",
-      dishes: [
-        "Filet Mignon – R350",
-        "Pan-Seared Duck Breast – R325",
-        "Grilled Chilean Sea Bass – R345",
-      ],
-    },
-    {
-      course: "Desserts",
-      dishes: [
-        "Dark Chocolate Fondant – R145",
-        "Crème Brûlée – R135",
-        "Tarte Tatin – R140",
-      ],
-    },
-    {
-      course: "Digestifs & Beverages",
-      dishes: [
-        "Espresso, Cappuccino, Specialty Teas – R45 – R65",
-        "Sommelier’s Wine Pairings – R120 per glass / R450 per bottle",
-        "Fine Cognac & Aged Whiskey Selection – From R180",
-      ],
-    },
+  const [currentScreen, setCurrentScreen] = useState<"home" | "addRemove" | "filter">("home");
+  const [menu, setMenu] = useState<Dish[]>([
+    { name: "Seared Scallops", description: "", course: "Starters", price: "R185" },
+    { name: "Beef Carpaccio", description: "", course: "Starters", price: "R165" },
+    { name: "Lobster Bisque", description: "", course: "Starters", price: "R175" },
+    { name: "Filet Mignon", description: "", course: "Mains", price: "R350" },
+    { name: "Pan-Seared Duck Breast", description: "", course: "Mains", price: "R325" },
+    { name: "Grilled Chilean Sea Bass", description: "", course: "Mains", price: "R345" },
+    { name: "Dark Chocolate Fondant", description: "", course: "Desserts", price: "R145" },
+    { name: "Crème Brûlée", description: "", course: "Desserts", price: "R135" },
+    { name: "Tarte Tatin", description: "", course: "Desserts", price: "R140" },
   ]);
 
-  const courses = [
-    { label: "Entrées (Starters)", value: "Entrées (Starters)" },
-    { label: "Plats Principaux (Mains)", value: "Plats Principaux (Mains)" },
-    { label: "Desserts", value: "Desserts" },
-    { label: "Digestifs & Beverages", value: "Digestifs & Beverages" },
-  ];
+  const [newDish, setNewDish] = useState<Dish>({
+    name: "",
+    description: "",
+    course: "",
+    price: "",
+  });
+  const [filter, setFilter] = useState<string>("Starters");
 
-  // Add dish to the menu and to the addedDishes array
   const handleAddDish = () => {
-    if (!dishName || !course || !price) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!newDish.name || !newDish.course || !newDish.price) {
+      Alert.alert("Please fill in all fields.");
       return;
     }
-
-    // Add the new dish to the menu
-    const updatedMenu = menu.map((section) => {
-      if (section.course === course) {
-        return {
-          ...section,
-          dishes: [
-            ...section.dishes,
-            `${dishName} – R${price}${description ? ` (${description})` : ""}`,
-          ],
-        };
-      }
-      return section;
-    });
-
-    setMenu(updatedMenu);
-
-    // Add the new dish to the addedDishes array
-    setAddedDishes((prevDishes) => [
-      ...prevDishes,
-      `${dishName} – R${price}${description ? ` (${description})` : ""}`,
-    ]);
-
-    // Clear form fields
-    setDishName("");
-    setDescription("");
-    setCourse("");
-    setPrice("");
-    Alert.alert("Success", "Dish added to the menu!");
+    setMenu([...menu, newDish]);
+    setNewDish({ name: "", description: "", course: "", price: "" });
+    Alert.alert("Dish Added", "Your dish has been added to the menu!");
   };
 
-  // Remove dish from the menu
   const handleRemoveDish = () => {
-    if (!dishName) {
-      Alert.alert("Error", "Please enter a dish name to remove");
-      return;
+    const updatedMenu = menu.filter((dish) => dish.name !== newDish.name);
+    if (updatedMenu.length === menu.length) {
+      Alert.alert("Dish Not Found", "No dish with that name exists.");
+    } else {
+      setMenu(updatedMenu);
+      setNewDish({ name: "", description: "", course: "", price: "" });
+      Alert.alert("Dish Removed", "The dish has been removed from the menu.");
     }
-
-    const updatedMenu = menu.map((section) => ({
-      ...section,
-      dishes: section.dishes.filter(
-        (dish) => !dish.toLowerCase().includes(dishName.toLowerCase())
-      ),
-    }));
-
-    setMenu(updatedMenu);
-    setDishName("");
-    Alert.alert("Removed", "Dish has been removed from the menu.");
   };
 
   // Home Screen
   const HomeScreen = () => (
-    <ScrollView style={styles.container}>
-      <Text style={styles.logo}>Christoffel’s</Text>
+    <KeyboardAwareScrollView style={styles.container}>
+      <Text style={styles.restaurantName}>Christoffel’s</Text>
       <Text style={styles.subtitle}>Tonight’s Menu</Text>
 
-      {menu.map((section, index) => (
-        <View key={index} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.course}</Text>
-          {section.dishes.map((dish, i) => (
-            <Text key={i} style={styles.dishText}>
-              {dish}
-            </Text>
-          ))}
+      {["Starters", "Mains", "Desserts", "Digestifs & Beverages"].map((section) => (
+        <View key={section} style={styles.section}>
+          <Text style={styles.sectionTitle}>{section}</Text>
+          {menu
+            .filter((dish) => dish.course === section)
+            .map((dish, index) => (
+              <Text key={index} style={styles.dishText}>
+                {dish.name} – {dish.price}
+              </Text>
+            ))}
         </View>
       ))}
-
-      <Text style={styles.subtitle}>Recently Added Dishes</Text>
-      {addedDishes.length > 0 ? (
-        addedDishes.map((dish, i) => (
-          <Text key={i} style={styles.dishText}>
-            {dish}
-          </Text>
-        ))
-      ) : (
-        <Text style={styles.dishText}>No dishes added yet</Text>
-      )}
 
       <TouchableOpacity
         style={styles.goldButton}
@@ -158,80 +84,118 @@ export default function App() {
       >
         <Text style={styles.buttonText}>Add / Remove Dishes</Text>
       </TouchableOpacity>
-    </ScrollView>
+
+      <TouchableOpacity
+        style={styles.goldButton}
+        onPress={() => setCurrentScreen("filter")}
+      >
+        <Text style={styles.buttonText}>Select Dishes by Course</Text>
+      </TouchableOpacity>
+    </KeyboardAwareScrollView>
   );
 
-  // Add / Remove Screen
+  // Add/Remove Screen
   const AddRemoveScreen = () => (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Add / Remove Dishes</Text>
+    <KeyboardAwareScrollView style={styles.container}>
+      <Text style={styles.title}>Manage Menu</Text>
 
       <TextInput
+        style={styles.input}
         placeholder="Dish Name"
-        value={dishName}
-        onChangeText={setDishName}
-        style={styles.input}
+        value={newDish.name}
+        onChangeText={(text) => setNewDish({ ...newDish, name: text })}
       />
-
       <TextInput
+        style={styles.input}
         placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        style={styles.input}
+        value={newDish.description}
+        onChangeText={(text) => setNewDish({ ...newDish, description: text })}
       />
-
-      <Dropdown
-        style={styles.dropdown}
-        data={courses}
-        labelField="label"
-        valueField="value"
-        placeholder="Select Course"
-        value={course}
-        onChange={(item) => setCourse(item.value)}
-      />
-
       <TextInput
-        placeholder="Price (e.g. 185)"
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric"
         style={styles.input}
+        placeholder="Course (e.g., Starters, Mains, Desserts)"
+        value={newDish.course}
+        onChangeText={(text) => setNewDish({ ...newDish, course: text })}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Price (e.g., R150)"
+        keyboardType="default"
+        value={newDish.price}
+        onChangeText={(text) => setNewDish({ ...newDish, price: text })}
       />
 
       <TouchableOpacity style={styles.goldButton} onPress={handleAddDish}>
-        <Text style={styles.buttonText}>Add Dish</Text>
+        <Text style={styles.buttonText}>Add to Menu</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.removeButton} onPress={handleRemoveDish}>
         <Text style={styles.buttonText}>Remove Dish</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.homeButton}
-        onPress={() => setCurrentScreen("home")}
-      >
+      <TouchableOpacity style={styles.homeButton} onPress={() => setCurrentScreen("home")}>
         <Text style={styles.buttonText}>Back to Home</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 
-  return currentScreen === "home" ? <HomeScreen /> : <AddRemoveScreen />;
+  // Filter Courses Screen
+  const FilterCoursesScreen = () => {
+    const filteredDishes = menu.filter((dish) => dish.course === filter);
+
+    return (
+      <KeyboardAwareScrollView style={styles.container}>
+        <Text style={styles.title}>Filter Courses</Text>
+
+        {["Starters", "Mains", "Desserts"].map((course) => (
+          <TouchableOpacity
+            key={course}
+            style={styles.goldButton}
+            onPress={() => setFilter(course)}
+          >
+            <Text style={styles.buttonText}>{course}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <Text style={styles.subtitle}>Showing: {filter}</Text>
+        {filteredDishes.map((dish, index) => (
+          <Text key={index} style={styles.dishText}>
+            {dish.name} – {dish.price}
+          </Text>
+        ))}
+
+        <TouchableOpacity style={styles.homeButton} onPress={() => setCurrentScreen("home")}>
+          <Text style={styles.buttonText}>Back to Home</Text>
+        </TouchableOpacity>
+      </KeyboardAwareScrollView>
+    );
+  };
+
+  return (
+    <>
+      {currentScreen === "home" ? (
+        <HomeScreen />
+      ) : currentScreen === "filter" ? (
+        <FilterCoursesScreen />
+      ) : (
+        <AddRemoveScreen />
+      )}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fffaf0",
+    backgroundColor: "#fff8e1",
     padding: 20,
   },
-  logo: {
-    fontSize: 42,
-    fontFamily: "serif",
-    fontStyle: "italic",
-    fontWeight: "300",
+  restaurantName: {
+    fontSize: 40,
     textAlign: "center",
-    marginTop: 20,
     color: "#6b4f1d",
+    fontFamily: "cursive",
+    marginVertical: 10,
   },
   subtitle: {
     fontSize: 22,
@@ -261,14 +225,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginVertical: 8,
-    backgroundColor: "#fff",
-  },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
     marginVertical: 8,
     backgroundColor: "#fff",
   },
